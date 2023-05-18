@@ -11,28 +11,31 @@ public class Category : Entity
     {
         Name = name;
         Active = true;
-        CreatedBy =  createdBy;
+        CreatedBy = createdBy;
         EditedBy = editedBy;
         CreatedOn = DateTime.Now;
         EditedOn = DateTime.Now;
 
-        Validate();   
+        Validate();
     }
 
     private void Validate()
     {
         var contract = new Contract<Category>()
-        .IsNotNullOrEmpty(Name, "Name")
-        .IsGreaterOrEqualsThan(Name, 3 , "Name")
-        .IsNotNullOrEmpty(CreatedBy, "CreatedBy")
-        .IsNotNullOrEmpty(EditedBy, "EditedBy");
+            .IsNotNullOrEmpty(Name, "Name")
+            .IsGreaterOrEqualsThan(Name, 3, "Name")
+            .IsNotNullOrEmpty(CreatedBy, "CreatedBy")
+            .IsNotNullOrEmpty(EditedBy, "EditedBy");
         AddNotifications(contract);
     }
-    public void EditInfo(string name, bool active)
+
+    public void EditInfo(string name, bool active, string editedBy)
     {
         Active = active;
         Name = name;
-        
-        Validate();   
+        EditedBy = editedBy;
+        EditedOn = DateTime.Now;
+
+        Validate();
     }
 }

@@ -1,8 +1,4 @@
-﻿using IWantApp.Domain.Products;
-using IWantApp.Infra.Data;
-using Microsoft.AspNetCore.Mvc;
-
-namespace IWantApp.Endpoints.Categories;
+﻿namespace IWantApp.Endpoints.Categories;
 
 public class CategoryPut
 {
@@ -10,21 +6,22 @@ public class CategoryPut
     public static string[] Methods => new string[] { HttpMethod.Put.ToString() };
     public static Delegate Handle => Action;
 
-    public static IResult Action([FromRoute]Guid id, CategoryRequest categoryRequest, ApplicationDbContext context)
+    [Authorize(Policy = "EmployeePolicy")]
+    public static async Task<IResult> Action(
+        [FromRoute] Guid id, HttpContext http, CategoryRequest categoryRequest, ApplicationDbContext context)
     {
+        var userId = http.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
         var category = context.Categories.Where(c => c.Id == id).FirstOrDefault();
 
-        if(category == null)
-        {
+        if (category == null)
             return Results.NotFound();
-        }
 
-        category.EditInfo(categoryRequest.Name, categoryRequest.Active);
+        category.EditInfo(categoryRequest.Name, categoryRequest.Active, userId);
 
-        if(!category.IsValid)
+        if (!category.IsValid)
             return Results.ValidationProblem(category.Notifications.ConvertToProblemDetails());
-            
-        context.SaveChanges();
+
+        await context.SaveChangesAsync();
 
         return Results.Ok();
     }
